@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Pendistribusian Barang dalam Supermarket</title>
+    <style>
+        body {
+            background-image: url('sp2.jpg');
+            background-size: cover;
+            background-color: #d3d3d3;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Changed from center to flex-start */
+            min-height: 100vh; /* Changed from fixed height to min-height */
+            margin: 0;
+            padding: 20px; /* Added padding to prevent content from touching the edge */
+        }
+        .container {
+            text-align: center;
+            background-color: #808080;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px; /* Set a maximum width */
+            box-sizing: border-box;
+        }
+        .button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 200px;
+            background-color: #A9A9A9;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 5px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: white;
+        }
+        .data-container {
+            display: none;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .data-container h2, .data-container h3 {
+            margin-top: 0;
+        }
+        .data-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Aplikasi Pendistribusian Barang dalam Supermarket</h1>
+        <button class="button" onclick="showForm('distribusiForm')">Buat Distribusi</button>
+        <button class="button" onclick="showForm('inputDataForm')">Input Data</button>
+        <button class="button" onclick="showData()">Lihat Data</button>
+        <button class="button" onclick="loadExampleData()">Muat Data Contoh</button>
+
+        <div id="distribusiForm" class="form-container">
+            <h2>Buat Distribusi</h2>
+            <div class="form-group">
+                <label for="algorithm">Pilih Algoritma:</label>
+                <select id="algorithm">
+                    <option value="greedyProfit">Greedy by Profit</option>
+                    <option value="greedyStok">Greedy by Stok</option>
+                    <option value="greedyDensity">Greedy by Density</option>
+                    <option value="bruteForce">Brute Force</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="maxStok">Masukkan Stok Maksimal:</label>
+                <input type="number" id="maxStok" />
+            </div>
+            <button class="button" onclick="buatDistribusi()">Proses Distribusi</button>
+        </div>
+
+        <div id="inputDataForm" class="form-container">
+            <h2>Input Data Barang</h2>
+            <div class="form-group">
+                <label for="itemName">Nama Barang:</label>
+                <input type="text" id="itemName" />
+            </div>
+            <div class="form-group">
+                <label for="itemStok">Stok Barang:</label>
+                <input type="number" id="itemStok" />
+            </div>
+            <div class="form-group">
+                <label for="itemPrice">Harga Barang:</label>
+                <input type="number" id="itemPrice" />
+            </div>
+            <div class="form-group">
+                <label for="itemCategory">Kategori Barang:</label>
+                <input type="text" id="itemCategory" />
+            </div>
+            <button class="button" onclick="inputData()">Simpan Data</button>
+        </div>
+
+        <div id="dataContainer" class="data-container">
+            <h2>Data Barang</h2>
+            <div id="dataItems"></div>
+        </div>
+
+        <div id="distributionResult" class="data-container">
+            <h2>Hasil Distribusi</h2>
+            <div id="distributionItems"></div>
+        </div>
+    </div>
+
+    <script>
+        let dataBarang = [];
+
+        function showForm(formId) {
+            document.getElementById('distribusiForm').style.display = 'none';
+            document.getElementById('inputDataForm').style.display = 'none';
+            document.getElementById('dataContainer').style.display = 'none';
+            document.getElementById('distributionResult').style.display = 'none';
+            document.getElementById(formId).style.display = 'block';
+        }
+
+        function showData() {
+            document.getElementById('distribusiForm').style.display = 'none';
+            document.getElementById('inputDataForm').style.display = 'none';
+            document.getElementById('distributionResult').style.display = 'none';
+            const dataContainer = document.getElementById('dataContainer');
+            const dataItems = document.getElementById('dataItems');
+            dataItems.innerHTML = '';
+
+            dataBarang.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'data-item';
+                itemDiv.innerHTML = `
+                    <strong>Nama:</strong> ${item.nama}<br>
+                    <strong>Stok:</strong> ${item.stok} pcs<br>
+                    <strong>Harga:</strong> Rp ${item.harga}<br>
+                    <strong>Kategori:</strong> ${item.kategori}
+                `;
+                dataItems.appendChild(itemDiv);
+            });
+
+            dataContainer.style.display = 'block';
+        }
+
+        function inputData() {
+            const nama = document.getElementById('itemName').value;
+            const stok = parseInt(document.getElementById('itemStok').value);
+            const harga = parseFloat(document.getElementById('itemPrice').value);
+            const kategori = document.getElementById('itemCategory').value;
+
+            if (nama && stok && harga && kategori) {
+                dataBarang.push({ nama, stok, harga, kategori });
+                alert('Data barang berhasil disimpan!');
+                document.getElementById('itemName').value = '';
+                document.getElementById('itemStok').value = '';
+                document.getElementById('itemPrice').value = '';
+                document.getElementById('itemCategory').value = '';
+            } else {
+                alert('Mohon lengkapi semua data barang.');
+            }
+        }
+
+        function loadExampleData() {
+            const exampleData = [
+                { nama: 'Beras', stok: 50, harga: 50000, kategori: 'Pangan' },
+                { nama: 'Minyak Goreng', stok: 20, harga: 25000, kategori: 'Pangan' },
+                { nama: 'Beras', stok: 50, harga: 50000, kategori: 'Pangan' },
+                { nama: 'Gula', stok: 100, harga: 12000, kategori: 'Pangan' },
+                { nama: 'Sabun', stok: 200, harga: 5000, kategori: 'Kebersihan' },
+                { nama: 'Shampoo', stok: 150, harga: 8000, kategori: 'Kebersihan' },
+                { nama: 'Telur', stok: 80, harga: 20000, kategori: 'Pangan' },
+                { nama: 'Susu', stok: 60, harga: 15000, kategori: 'Pangan' },
+                { nama: 'Roti', stok: 70, harga: 10000, kategori: 'Pangan' },
+                { nama: 'Kopi', stok: 90, harga: 30000, kategori: 'Pangan' },
+                { nama: 'Teh', stok: 120, harga: 15000, kategori: 'Pangan' },
+                { nama: 'Pasta Gigi', stok: 110, harga: 7000, kategori: 'Kebersihan' },
+                { nama: 'Detergen', stok: 130, harga: 9000, kategori: 'Kebersihan' },
+                { nama: 'Tisu', stok: 140, harga: 4000, kategori: 'Kebersihan' },
+                { nama: 'Sapu', stok: 50, harga: 15000, kategori: 'Kebersihan' },
+                { nama: 'Pel', stok: 60, harga: 12000, kategori: 'Kebersihan' },
+                { nama: 'Daging Ayam', stok: 40, harga: 40000, kategori: 'Pangan' },
+                { nama: 'Ikan', stok: 30, harga: 35000, kategori: 'Pangan' },
+                { nama: 'Kentang', stok: 60, harga: 10000, kategori: 'Pangan' }
+            ];
+            dataBarang = exampleData;
+            alert('Data contoh berhasil dimuat!');
+            showData();
+        }
+
+        function buatDistribusi() {
+            const algorithm = document.getElementById('algorithm').value;
+            const maxStok = parseInt(document.getElementById('maxStok').value);
+
+            if (maxStok) {
+                const startTime = new Date().getTime();
+                if (algorithm === 'greedyProfit') {
+                    greedyAlgorithm(maxStok, 'profit');
+                } else if (algorithm === 'greedyStok') {
+                    greedyAlgorithm(maxStok, 'stok');
+                } else if (algorithm === 'greedyDensity') {
+                    greedyAlgorithm(maxStok, 'density');
+                } else if (algorithm === 'bruteForce') {
+                    bruteForceAlgorithm(maxStok);
+                }
+                const endTime = new Date().getTime();
+                const timeTaken = (endTime - startTime) / 1000;
+                displayTimeTaken(timeTaken);
+            } else {
+                alert('Mohon masukkan stok maksimal.');
+            }
+        }
+
+        function greedyAlgorithm(maxStok, criteria) {
+            let sortedItems;
+            if (criteria === 'profit') {
+                sortedItems = dataBarang.slice().sort((a, b) => b.harga - a.harga);
+            } else if (criteria === 'stok') {
+                sortedItems = dataBarang.slice().sort((a, b) => a.stok - b.stok);
+            } else if (criteria === 'density') {
+                sortedItems = dataBarang.slice().sort((a, b) => (b.harga / b.stok) - (a.harga / a.stok));
+            }
+
+            let totalStok = 0;
+            let totalValue = 0;
+            let selectedItems = [];
+
+            for (let item of sortedItems) {
+                if (totalStok + item.stok <= maxStok) {
+                    selectedItems.push(item);
+                    totalStok += item.stok;
+                    totalValue += item.harga;
+                }
+            }
+
+            displayDistributionResult(selectedItems, totalStok, totalValue, `Greedy by ${criteria}`);
+        }
+
+        function bruteForceAlgorithm(maxStok) {
+            let bestValue = 0;
+            let bestCombination = [];
+
+            function helper(start, currentStok, currentValue, currentCombination) {
+                if (currentStok <= maxStok && currentValue > bestValue) {
+                    bestValue = currentValue;
+                    bestCombination = currentCombination.slice();
+                }
+                for (let i = start; i < dataBarang.length; i++) {
+                    currentCombination.push(dataBarang[i]);
+                    helper(i + 1, currentStok + dataBarang[i].stok, currentValue + dataBarang[i].harga, currentCombination);
+                    currentCombination.pop();
+                }
+            }
+
+            helper(0, 0, 0, []);
+
+            displayDistributionResult(bestCombination, bestCombination.reduce((acc, item) => acc + item.stok, 0), bestValue, 'Brute Force');
+        }
+
+        function displayDistributionResult(selectedItems, totalStok, totalValue, method) {
+            const distributionResult = document.getElementById('distributionResult');
+            const distributionItems = document.getElementById('distributionItems');
+            distributionItems.innerHTML = '';
+
+            selectedItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'data-item';
+                itemDiv.innerHTML = `
+                    <strong>Nama:</strong> ${item.nama}<br>
+                    <strong>Stok:</strong> ${item.stok} pcs<br>
+                    <strong>Harga:</strong> Rp ${item.harga}<br>
+                    <strong>Kategori:</strong> ${item.kategori}
+                `;
+                distributionItems.appendChild(itemDiv);
+            });
+
+            const totalHarga = selectedItems.reduce((acc, item) => acc + (item.stok * item.harga), 0);
+
+            const resultSummary = document.createElement('div');
+            resultSummary.innerHTML = `
+                <h3>Metode: ${method}</h3>
+                <strong>Total Stok:</strong> ${totalStok} pcs<br>
+                <strong>Total Harga:</strong> Rp ${totalHarga}
+            `;
+            distributionItems.appendChild(resultSummary);
+
+            distributionResult.style.display = 'block';
+        }
+
+        function displayTimeTaken(timeTaken) {
+            const timeTakenDiv = document.createElement('div');
+            timeTakenDiv.innerHTML = `<strong>Waktu yang diperlukan:</strong> ${timeTaken.toFixed(5)} detik`;
+            document.getElementById('distributionItems').appendChild(timeTakenDiv);
+        }
+    </script>
+</body>
+</html>

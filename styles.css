@@ -1,0 +1,18 @@
+body {
+  background-image: url("sp2.jpg");
+  /* backgorund size pake cover biar backgournd imagenya menuhin ukuran dari si web nya mau dia ke stretch juga gpp */
+  background-size: cover;
+  /* kode dibawah buat bg imagenya biar tengah horizontal dan tengah vertikal */
+  background-position: center center;
+  /* display flex itu jadi tiap level nya itu saling nyatu */
+  display: flex;
+
+  flex-direction: column;
+  justify-content: center;
+  /*  */
+  align-items: center;
+  min-height: 100vh;
+  font-family: "Times New Roman", Times, serif;
+  margin: 0;
+  color: white;
+}
