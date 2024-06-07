@@ -12,10 +12,10 @@
             font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Changed from center to flex-start */
-            min-height: 100vh; /* Changed from fixed height to min-height */
+            align-items: flex-start;
+            min-height: 100vh;
             margin: 0;
-            padding: 20px; /* Added padding to prevent content from touching the edge */
+            padding: 20px;
         }
         .container {
             text-align: center;
@@ -23,7 +23,7 @@
             padding: 20px;
             border-radius: 10px;
             width: 100%;
-            max-width: 400px; /* Set a maximum width */
+            max-width: 400px;
             box-sizing: border-box;
         }
         .button {
@@ -183,7 +183,6 @@
             const exampleData = [
                 { nama: 'Beras', stok: 50, harga: 50000, kategori: 'Pangan' },
                 { nama: 'Minyak Goreng', stok: 20, harga: 25000, kategori: 'Pangan' },
-                { nama: 'Beras', stok: 50, harga: 50000, kategori: 'Pangan' },
                 { nama: 'Gula', stok: 100, harga: 12000, kategori: 'Pangan' },
                 { nama: 'Sabun', stok: 200, harga: 5000, kategori: 'Kebersihan' },
                 { nama: 'Shampoo', stok: 150, harga: 8000, kategori: 'Kebersihan' },
@@ -211,6 +210,10 @@
             const maxStok = parseInt(document.getElementById('maxStok').value);
 
             if (maxStok) {
+                // Reset the distribution result display
+                const distributionItems = document.getElementById('distributionItems');
+                distributionItems.innerHTML = '';
+
                 const startTime = new Date().getTime();
                 if (algorithm === 'greedyProfit') {
                     greedyAlgorithm(maxStok, 'profit');
@@ -247,7 +250,7 @@
                 if (totalStok + item.stok <= maxStok) {
                     selectedItems.push(item);
                     totalStok += item.stok;
-                    totalValue += item.harga;
+                    totalValue += item.harga * item.stok; // Calculate total value as stok * harga
                 }
             }
 
@@ -257,51 +260,77 @@
         function bruteForceAlgorithm(maxStok) {
             let bestValue = 0;
             let bestCombination = [];
+            let allCombinations = [];
 
             function helper(start, currentStok, currentValue, currentCombination) {
-                if (currentStok <= maxStok && currentValue > bestValue) {
-                    bestValue = currentValue;
-                    bestCombination = currentCombination.slice();
+                if (currentStok <= maxStok) {
+                    allCombinations.push({ combination: currentCombination.slice(), value: currentValue, stok: currentStok });
+                    if (currentValue > bestValue) {
+                        bestValue = currentValue;
+                        bestCombination = currentCombination.slice();
+                    }
                 }
                 for (let i = start; i < dataBarang.length; i++) {
                     currentCombination.push(dataBarang[i]);
-                    helper(i + 1, currentStok + dataBarang[i].stok, currentValue + dataBarang[i].harga, currentCombination);
+                    helper(i + 1, currentStok + dataBarang[i].stok, currentValue + (dataBarang[i].harga * dataBarang[i].stok), currentCombination);
                     currentCombination.pop();
                 }
             }
 
             helper(0, 0, 0, []);
 
+            displayAllCombinations(allCombinations);
             displayDistributionResult(bestCombination, bestCombination.reduce((acc, item) => acc + item.stok, 0), bestValue, 'Brute Force');
+        }
+
+        function displayAllCombinations(allCombinations) {
+            const distributionResult = document.getElementById('distributionResult');
+            const distributionItems = document.getElementById('distributionItems');
+            distributionItems.innerHTML = '';
+
+            allCombinations.forEach((combo, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'data-item';
+                itemDiv.innerHTML = `<strong>Kombinasi ${index + 1}:</strong><br>`;
+                combo.combination.forEach(item => {
+                    itemDiv.innerHTML += `
+                        <strong>Nama:</strong> ${item.nama}<br>
+                        <strong>Stok:</strong> ${item.stok} pcs<br>
+                        <strong>Harga:</strong> Rp ${item.harga}<br>
+                        <strong>Kategori:</strong> ${item.kategori}<br><br>
+                    `;
+                });
+                itemDiv.innerHTML += `
+                    <strong>Total Stok:</strong> ${combo.stok} pcs<br>
+                    <strong>Total Harga:</strong> Rp ${combo.value}<br>
+                    <hr>
+                `;
+                distributionItems.appendChild(itemDiv);
+            });
+
+            distributionResult.style.display = 'block';
         }
 
         function displayDistributionResult(selectedItems, totalStok, totalValue, method) {
             const distributionResult = document.getElementById('distributionResult');
             const distributionItems = document.getElementById('distributionItems');
-            distributionItems.innerHTML = '';
+            const bestCombinationDiv = document.createElement('div');
 
+            bestCombinationDiv.innerHTML = `<h3>Kombinasi Terbaik (${method}):</h3>`;
             selectedItems.forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'data-item';
-                itemDiv.innerHTML = `
+                bestCombinationDiv.innerHTML += `
                     <strong>Nama:</strong> ${item.nama}<br>
                     <strong>Stok:</strong> ${item.stok} pcs<br>
                     <strong>Harga:</strong> Rp ${item.harga}<br>
-                    <strong>Kategori:</strong> ${item.kategori}
+                    <strong>Kategori:</strong> ${item.kategori}<br><br>
                 `;
-                distributionItems.appendChild(itemDiv);
             });
-
-            const totalHarga = selectedItems.reduce((acc, item) => acc + (item.stok * item.harga), 0);
-
-            const resultSummary = document.createElement('div');
-            resultSummary.innerHTML = `
-                <h3>Metode: ${method}</h3>
+            bestCombinationDiv.innerHTML += `
                 <strong>Total Stok:</strong> ${totalStok} pcs<br>
-                <strong>Total Harga:</strong> Rp ${totalHarga}
+                <strong>Total Harga:</strong> Rp ${totalValue}
             `;
-            distributionItems.appendChild(resultSummary);
 
+            distributionItems.appendChild(bestCombinationDiv);
             distributionResult.style.display = 'block';
         }
 
